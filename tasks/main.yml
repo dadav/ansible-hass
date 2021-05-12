@@ -1,0 +1,46 @@
+---
+- name: Install dependencies
+  package:
+    name: "{{ hass_packages.apt }}"
+    state: present
+
+- name: Add the user for homeassistant
+  ansible.builtin.user:
+    name: "{{ hass_user }}"
+    groups:
+      - dialout
+      - gpio
+      - i2c
+    append: yes
+
+- name: Create the workdir
+  ansible.builtin.file:
+    path: "{{ hass_workdir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ hass_user }}"
+
+- name: Install homeassistant pip deps
+  pip:
+    name: "{{ hass_packages.pip }}"
+    virtualenv: "{{ hass_workdir }}/venv"
+    virtualenv_command: /usr/bin/python3 -m venv
+    virtualenv_site_packages: yes
+  become: yes
+  become_user: "{{ hass_user }}"
+
+- name: Install homeassistant via pip
+  pip:
+    name: homeassistant
+    virtualenv: "{{ hass_workdir }}/venv"
+    virtualenv_command: /usr/bin/python3 -m venv
+    virtualenv_site_packages: yes
+  become: yes
+  become_user: "{{ hass_user }}"
+
+- name: Copy servicefile
+  template:
+    src: 'hass.service.j2'
+    dest: '/etc/systemd/system/hass.service'
+  notify:
+    - restart hass

@@ -1,0 +1,14 @@
+[Unit]
+Description=Service file for homeassistent
+
+[Service]
+Restart=always
+RestartSec=90
+StartLimitInterval=0
+User={{ hass_user }}
+TimeoutStartSec=30m
+
+ExecStart={{ hass_workdir }}/bin/hass
+
+[Install]
+WantedBy=multi-user.target

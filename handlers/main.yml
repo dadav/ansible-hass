@@ -1,0 +1,6 @@
+---
+- name: restart hass
+  service:
+    name: hass.service
+    enabled: yes
+    state: restarted
